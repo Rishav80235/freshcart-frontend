@@ -339,8 +339,8 @@ const getStyles = (width) =>
     categoryIconCircle: {
       width: width > 600 ? 60 : 50,
       height: width > 600 ? 60 : 50,
-      borderRadius: width > 600 ? 40 : 30,
-      backgroundColor: "#fef3e2",
+      // borderRadius: width > 600 ? 40 : 30,
+      backgroundColor: "#fefefe",
       justifyContent: "center",
       alignItems: "center",
       marginBottom: 5,

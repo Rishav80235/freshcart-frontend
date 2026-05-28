@@ -15,6 +15,11 @@ function Login() {
     useEffect(() => {
         const checkLoggedInUser = async () => {
             try {
+                const storedAdmin = await AsyncStorage.getItem("adminUser");
+                if (storedAdmin) {
+                    router.replace("/Dashboard");
+                    return;
+                }
                 const storedUser = await AsyncStorage.getItem("user");
                 if (storedUser) {
                     router.replace("/Index");
@@ -35,8 +40,14 @@ function Login() {
         .then(async (res) => {
             if (res.data.status) {
                 try {
-                    await AsyncStorage.setItem('user', JSON.stringify(res.data.user));
-                    router.replace("/Index");
+                    const userData = res.data.user;
+                    if (userData.role === "admin") {
+                        await AsyncStorage.setItem('adminUser', JSON.stringify(userData));
+                        router.replace("/Dashboard");
+                    } else {
+                        await AsyncStorage.setItem('user', JSON.stringify(userData));
+                        router.replace("/Index");
+                    }
                   } catch (e) {
                     console.log(e);
                   }
@@ -68,6 +79,10 @@ function Login() {
                 <Link href={"/Signup"} asChild><TouchableOpacity><Text style={styles.link}>Sign Up</Text></TouchableOpacity></Link>
                 <Link href={"/Resetpassword"} asChild><TouchableOpacity><Text style={styles.link}>Forgot Password?</Text></TouchableOpacity></Link>
             </View>
+
+            {/* <View style={{...styles.linkRow, justifyContent: 'center', marginTop: 10}}>
+                <Link href={"/AdminLogin"} asChild><TouchableOpacity><Text style={styles.link}>Admin Login</Text></TouchableOpacity></Link>
+            </View> */}
         </View>
     )
 }

@@ -17,6 +17,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { API_BASE_URL } from "../../constants/api";
 import { ProductsDashboardContext } from "../../context/ProductsDashboardContext";
+import { CategoriesDashboardContext } from "../../context/CategoriesDashboardContext";
 
 function CustomRadioButton({ label, selected, onSelect }) {
   return (
@@ -45,24 +46,8 @@ function Addproducts() {
     productSku: "",
     status: "Active",
   });
-  const [categories, setCategories] = useState([]);
   const { addProduct } = useContext(ProductsDashboardContext);
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/categories`);
-      const data = await response.json();
-      if (data.status) {
-        setCategories(data.categories);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
+  const { categories } = useContext(CategoriesDashboardContext);
 
   const inputvalue = (name, value) => {
     setdata({ ...data, [name]: value });
@@ -272,7 +257,7 @@ function Addproducts() {
                 <Text style={styles.label}>Regular Price</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="$0.00"
+                  placeholder="₹0.00"
                   value={data.regularPrice}
                   onChangeText={(text) => inputvalue("regularPrice", text)}
                   keyboardType="numeric"
@@ -282,7 +267,7 @@ function Addproducts() {
                 <Text style={styles.label}>Sale Price</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="$0.00"
+                  placeholder="₹0.00"
                   value={data.salePrice}
                   onChangeText={(text) => inputvalue("salePrice", text)}
                   keyboardType="numeric"

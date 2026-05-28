@@ -1,14 +1,44 @@
 //===================================
 //     DashboardLayout
 //===================================
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Link, Slot, usePathname } from "expo-router";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Link, Slot, usePathname, useRouter } from "expo-router";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DashboardLayout = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const adminUser = await AsyncStorage.getItem("adminUser");
+        if (!adminUser) {
+          router.replace("/");
+        } else {
+          setIsChecking(false);
+        }
+      } catch (e) {
+        console.log(e);
+        router.replace("/");
+      }
+    };
+    checkAdmin();
+  }, [router]);
+
+  if (isChecking) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#10ac84" />
+      </View>
+    );
+  }
 
   const menuItems = [
+    { name: "Admin Profile", href: "/AdminProfile" },
     { name: "Dashboard", href: "/Dashboard" },
     { name: "Products", href: "/Products" },
     { name: "Category", href: "/Category" },

@@ -16,6 +16,7 @@ import { Picker } from "@react-native-picker/picker";
 import { CartContext } from "../../context/CartContext";
 import { WishlistContext } from "../../context/WishlistContext";
 import { ProductsDashboardContext } from "../../context/ProductsDashboardContext";
+import { CategoriesDashboardContext } from "../../context/CategoriesDashboardContext";
 
 function CustomRadioButton({ label, selected, onSelect }) {
   return (
@@ -34,29 +35,16 @@ function EditProduct() {
   const router = useRouter();
   const { product: productString } = useLocalSearchParams();
   const [product, setProduct] = useState(null);
-  const [categories, setCategories] = useState([]);
   const { updateProductInCart } = useContext(CartContext);
   const { updateProductInWishlist } = useContext(WishlistContext);
   const { updateProduct } = useContext(ProductsDashboardContext);
+  const { categories } = useContext(CategoriesDashboardContext);
 
   useEffect(() => {
     if (productString) {
       setProduct(JSON.parse(productString));
     }
-    fetchCategories();
   }, [productString]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("http://localhost:8080/categories");
-      const data = await response.json();
-      if (data.status) {
-        setCategories(data.categories);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
 
   const inputvalue = (name, value) => {
     setProduct({ ...product, [name]: value });

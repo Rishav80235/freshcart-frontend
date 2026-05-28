@@ -59,7 +59,7 @@ const AddCategory = () => {
 
   const handleAddCategory = () => {
     axios
-(`${API_BASE_URL}/categories`, data)
+      .post(`${API_BASE_URL}/categories`, data)
       .then((res) => {
         if (res.data.status) {
           alert("Category added successfully");
