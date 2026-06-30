@@ -10,7 +10,9 @@ import {
   useWindowDimensions,
   StatusBar,
   Alert,
+  Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -22,9 +24,10 @@ import { API_BASE_URL } from "../../constants/api";
 const Profile = () => {
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { cart } = useContext(CartContext);
   const { width } = useWindowDimensions();
-  const styles = createStyles(width);
+  const styles = createStyles(width, insets);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -175,12 +178,12 @@ const menuStyles = StyleSheet.create({
     }
 });
 
-function createStyles(width) {
+function createStyles(width, insets) {
   return StyleSheet.create({
     mainContainer: {
       flex: 1,
       backgroundColor: "#f8f9fa",
-      marginTop: 45,
+      marginTop: Platform.OS === "android" ? insets.top : 45,
     },
     header: {
       backgroundColor: "#2c3e50",

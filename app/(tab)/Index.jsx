@@ -11,7 +11,9 @@ import {
   useWindowDimensions,
   ActivityIndicator,
   Image,
+  Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { API_BASE_URL } from "../../constants/api";
 import { CartContext } from "../../context/CartContext";
@@ -21,10 +23,11 @@ import axios from "axios";
 
 function Index() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { width } = useWindowDimensions();
-  const styles = getStyles(width);
+  const styles = getStyles(width, insets);
   const { cart, addToCart } = useContext(CartContext);
   const { wishlist, addToWishlist, removeFromWishlist } =
     useContext(WishlistContext);
@@ -82,11 +85,11 @@ function Index() {
       }
     } catch (e) {
       console.error("Axios Error:", e);
-      setError("Server se connect nahi ho paya. IP check karein.");
-  } finally {
-    setLoading(false);
-  }
-};
+      setError("Server se connect nahi ho paya. Internet check karein.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
 const openProduct = (item) => {
   router.push({
@@ -259,9 +262,9 @@ if (loading) {
   );
 }
 
-const getStyles = (width) =>
+const getStyles = (width, insets) =>
   StyleSheet.create({
-    container: { flex: 1, marginTop: 45, backgroundColor: "#fff" },
+    container: { flex: 1, marginTop: Platform.OS === "android" ? insets.top : 45, backgroundColor: "#fff" },
     header: {
       backgroundColor: "#0aad0a",
       flexDirection: "row",

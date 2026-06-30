@@ -1,71 +1,89 @@
 //===================================
 //     Wishlist
 //===================================
-import React, { useContext } from 'react';
-import { 
-  View, Text, StyleSheet, SafeAreaView, ScrollView, 
-  TouchableOpacity, Image, Dimensions 
-} from 'react-native';
-import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { WishlistContext } from '../../context/WishlistContext';
-import { CartContext } from '../../context/CartContext';
-import ProductDetail from '../ProductDetail';
-
-const { width } = Dimensions.get('window');
+import React, { useContext, useMemo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { WishlistContext } from "../../context/WishlistContext";
+import { CartContext } from "../../context/CartContext";
 
 export default function Wishlist() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(() => createStyles(insets), [insets]);
+
   const { wishlist, removeFromWishlist } = useContext(WishlistContext);
   const { addToCart } = useContext(CartContext);
 
   const handleAddToCart = (item) => {
     addToCart(item);
-    router.push('/Cart');
+    router.push("/Cart");
   };
 
-  // --- RENDER TABLE ROW ---
-  const renderTableRow = (item) => {
-    const itemId = item._id || item.id; 
+  const openProduct = (item) => {
+    router.push({
+      pathname: "/ProductDetail",
+      params: { item: JSON.stringify(item) },
+    });
+  };
 
-    // Product Detail Page par jane ke liye function
-    const Product = () => {
-      router.push({
-        pathname: "/ProductDetail",
-        params: { item: JSON.stringify(item) },
-      });
-    };
+  const renderWishlistCard = (item) => {
+    const itemId = item._id || item.id;
+
     return (
-      <View key={itemId} style={styles.tableRow}>
-        
-        <TouchableOpacity style={styles.cellProduct} onPress={Product} activeOpacity={0.7}>
-          <Image source={{ uri: item.image || item.thumbnail }} style={styles.productImg} resizeMode="contain" />
-          <View>
-            <Text style={styles.productName}>{item.title || "Unnamed Product"}</Text>
-            <Text style={styles.productUnit}>{item.unit || "1 Pc"}</Text>
-          </View>
+      <View key={itemId} style={styles.card}>
+        <TouchableOpacity
+          style={styles.imageContainer}
+          onPress={() => openProduct(item)}
+          activeOpacity={0.7}
+        >
+          <Image
+            source={{ uri: item.image || item.thumbnail }}
+            style={styles.productImg}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
 
-        {/* Amount */}
-        <View style={styles.cellAmount}>
-          <Text style={styles.priceText}>₹{(item.salePrice || item.price || 0).toFixed(2)}</Text>
-        </View>
-
-
-        {/* Actions */}
-        <View style={styles.cellAction}>
-    
-            <TouchableOpacity style={styles.addBtn} onPress={() => handleAddToCart(item)}>
-              <Text style={styles.addBtnText}>Add to cart</Text>
+        <View style={styles.cardContent}>
+          <View style={styles.titleRow}>
+            <TouchableOpacity style={styles.titleWrap} onPress={() => openProduct(item)}>
+              <Text style={styles.productName} numberOfLines={2}>
+                {item.title || "Unnamed Product"}
+              </Text>
+              <Text style={styles.productUnit}>{item.unit || "1 Pc"}</Text>
             </TouchableOpacity>
-          
-        </View>
 
-        {/* Remove Button */}
-        <View style={styles.cellRemove}>
-          <TouchableOpacity onPress={() => removeFromWishlist(item)} style={styles.removeIconBtn}>
-            <Feather name="trash-2" size={18} color="#94a3b8" />
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => removeFromWishlist(item)}
+              style={styles.deleteIcon}
+            >
+              <Feather name="trash-2" size={17} color="#94a3b8" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.bottomRow}>
+            <Text style={styles.priceText}>
+              ₹{(item.salePrice || item.price || 0).toFixed(2)}
+            </Text>
+            <TouchableOpacity
+              style={styles.addToCartBtn}
+              onPress={() => handleAddToCart(item)}
+            >
+              <Feather name="shopping-bag" size={14} color="#fff" />
+              <Text style={styles.addBtnText}>Add to Cart</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -73,72 +91,182 @@ export default function Wishlist() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        
-        {/* Header Breadcrumb */}
-        <View style={styles.breadcrumb}>
-          <Text style={styles.breadcrumbLink} onPress={() => router.push('/Index')}>Home</Text>
-          <Text style={styles.breadcrumbSlash}> / </Text>
-          <Text style={styles.breadcrumbCurrent}>Shop Wishlist</Text>
-        </View>
-
-        <View style={styles.titleSection}>
+      <View style={styles.header}>
+        <View>
           <Text style={styles.pageTitle}>My Wishlist</Text>
-          <Text style={styles.subtitle}>There are {wishlist.length} products in this wishlist.</Text>
+          <Text style={styles.subtitle}>
+            {wishlist.length} {wishlist.length === 1 ? "item" : "items"} saved
+          </Text>
         </View>
+        <View style={styles.heartBadge}>
+          <Feather name="heart" size={18} color="#fff" />
+        </View>
+      </View>
 
-        {/* Table View */}
-        <View style={styles.tableContainer}>
-          <View style={styles.tableHeader}>
-            <Text style={[styles.headerText, styles.cellProduct]}>Product</Text>
-            <Text style={[styles.headerText, styles.cellAmount]}>Amount</Text>
-            <Text style={[styles.headerText, styles.cellAction]}>Actions</Text>
-            <Text style={[styles.headerText, styles.cellRemove]}>Remove</Text>
-          </View>
-
-          {wishlist.length > 0 ? (
-            wishlist.map(renderTableRow)
-          ) : (
-            <View style={styles.emptyState}>
-              <Feather name="heart" size={40} color="#cbd5e1" />
-              <Text style={styles.emptyText}>Your wishlist is empty</Text>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {wishlist.length > 0 ? (
+          <View style={styles.listContainer}>{wishlist.map(renderWishlistCard)}</View>
+        ) : (
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIconBg}>
+              <Feather name="heart" size={48} color="#cbd5e1" />
             </View>
-          )}
-        </View>
-
+            <Text style={styles.emptyTitle}>Wishlist is empty</Text>
+            <Text style={styles.emptyText}>
+              Save your favorite items here to buy them later.
+            </Text>
+            <TouchableOpacity
+              style={styles.exploreBtn}
+              onPress={() => router.push("/Index")}
+            >
+              <Text style={styles.exploreBtnText}>Explore Products</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// Styles ekdum same hain purane UI jaise
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, marginTop: 45, backgroundColor: '#fff' },
-  container: { flex: 1, paddingHorizontal: width > 768 ? 40 : 15 },
-  breadcrumb: { flexDirection: 'row', marginTop: 20, marginBottom: 15 },
-  breadcrumbLink: { color: '#0aad0a', fontSize: 14, fontWeight: '500' },
-  breadcrumbSlash: { color: '#94a3b8', fontSize: 14 },
-  breadcrumbCurrent: { color: '#64748b', fontSize: 14 },
-  titleSection: { marginBottom: 30 },
-  pageTitle: { fontSize: 32, fontWeight: 'bold', color: '#0f172a', marginBottom: 8 },
-  subtitle: { fontSize: 15, color: '#64748b' },
-  tableContainer: { borderWidth: 1, borderColor: '#f1f5f9', borderRadius: 8, overflow: 'hidden', marginBottom: 50 },
-  tableHeader: { flexDirection: 'row', backgroundColor: '#f8fafc', paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
-  headerText: { fontSize: 14, fontWeight: '600', color: '#475569' },
-  tableRow: { flexDirection: 'row', paddingVertical: 20, borderBottomWidth: 1, borderBottomColor: '#f1f5f9', alignItems: 'center' },
-  cellProduct: { flex: 2, flexDirection: 'row', alignItems: 'center' },
-  cellAmount: { flex: 1 },
-  cellAction: { flex: 1 },
-  cellRemove: { width: 80, alignItems: 'center', justifyContent: 'center' },
-  productImg: { width: 45, height: 45, marginRight: 15 },
-  productName: { fontSize: 15, fontWeight: '600', color: '#0f172a', marginBottom: 4 },
-  productUnit: { fontSize: 13, color: '#64748b' },
-  priceText: { fontSize: 15, paddingTop: 25, fontWeight: '600', color: '#475569' },
-  addBtn: { backgroundColor: '#0aad0a', width: '100',paddingVertical: 8, paddingHorizontal: 15, borderRadius: 6, alignSelf: 'flex-start' },
-  addBtnText: { color: '#fff', fontSize: 13, fontWeight: 'bold' },
-  contactBtn: { backgroundColor: '#0f172a', paddingVertical: 8, paddingHorizontal: 15, borderRadius: 6, alignSelf: 'flex-start' },
-  contactBtnText: { color: '#fff', fontSize: 13, fontWeight: 'bold' },
-  removeIconBtn: { padding: 5 },
-  emptyState: { padding: 50, alignItems: 'center', justifyContent: 'center' },
-  emptyText: { marginTop: 15, fontSize: 16, color: '#64748b' }
-});
+const createStyles = (insets) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: "#f8fafc",
+      paddingTop: Platform.OS === "android" ? insets.top : 0,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      backgroundColor: "#fff",
+      borderBottomWidth: 1,
+      borderBottomColor: "#f1f5f9",
+    },
+    pageTitle: { fontSize: 22, fontWeight: "800", color: "#0f172a" },
+    subtitle: {
+      fontSize: 13,
+      color: "#64748b",
+      marginTop: 4,
+      fontWeight: "500",
+    },
+    heartBadge: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: "#0aad0a",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    container: { flex: 1 },
+    scrollContent: { padding: 16, paddingBottom: 24 },
+    listContainer: { gap: 0 },
+
+    card: {
+      flexDirection: "row",
+      backgroundColor: "#fff",
+      borderRadius: 14,
+      padding: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: "#f1f5f9",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    imageContainer: {
+      width: 84,
+      height: 84,
+      backgroundColor: "#f8fafc",
+      borderRadius: 10,
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 6,
+      marginRight: 12,
+    },
+    productImg: { width: "100%", height: "100%" },
+
+    cardContent: { flex: 1, justifyContent: "space-between" },
+    titleRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      gap: 8,
+    },
+    titleWrap: { flex: 1 },
+    productName: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: "600",
+      color: "#0f172a",
+      marginBottom: 4,
+      lineHeight: 20,
+    },
+    productUnit: { fontSize: 12, color: "#64748b" },
+    deleteIcon: { padding: 4 },
+
+    bottomRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 10,
+      gap: 12,
+    },
+    priceText: { fontSize: 17, fontWeight: "700", color: "#0aad0a" },
+
+    addToCartBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: "#0aad0a",
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+    },
+    addBtnText: { color: "#fff", fontSize: 12, fontWeight: "700" },
+
+    emptyState: {
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 60,
+      paddingHorizontal: 30,
+    },
+    emptyIconBg: {
+      backgroundColor: "#f1f5f9",
+      width: 96,
+      height: 96,
+      borderRadius: 48,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 20,
+    },
+    emptyTitle: {
+      fontSize: 20,
+      fontWeight: "700",
+      color: "#0f172a",
+      marginBottom: 8,
+    },
+    emptyText: {
+      fontSize: 14,
+      color: "#64748b",
+      textAlign: "center",
+      marginBottom: 28,
+      lineHeight: 22,
+    },
+    exploreBtn: {
+      backgroundColor: "#0aad0a",
+      paddingVertical: 14,
+      paddingHorizontal: 28,
+      borderRadius: 10,
+    },
+    exploreBtnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
+  });

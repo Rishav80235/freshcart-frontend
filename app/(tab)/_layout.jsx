@@ -5,10 +5,13 @@ import { Tabs, usePathname } from "expo-router";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AntDesign, Feather } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Platform } from "react-native";
 
 
 export default function TabLayout() {
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const showTabs = !["/Signup", "/Login", "/Resetpassword"].includes(pathname);
 
@@ -34,7 +37,8 @@ export default function TabLayout() {
         tabBarStyle: {
           paddingBottom: 5,
           paddingTop: 5,
-          height: 60,
+          marginBottom: (Platform.OS === "android" ? insets.bottom : 0),
+          height: 60 + (Platform.OS === "android" ? insets.bottom : 0),
           backgroundColor: "#fff",
           display: showTabs ? "flex" : "none",
         },

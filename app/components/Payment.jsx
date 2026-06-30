@@ -29,6 +29,9 @@ const PAYMENT_OPTIONS = [
   },
 ];
 
+// Razorpay Test Key ID
+const RAZORPAY_TEST_KEY_ID = "rzp_test_vv1FCZvuDRF6lQ";
+
 const Payment = () => {
   const router = useRouter();
   const { checkoutData } = useLocalSearchParams();
@@ -42,8 +45,8 @@ const Payment = () => {
   const [selectedMethod, setSelectedMethod] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handlePlaceOrder = async (paymentId = "COD_OFFLINE") => {
-    if (!selectedMethod && paymentId === "COD_OFFLINE") {
+  const handlePlaceOrder = async (paymentDetails = {}) => {
+    if (!selectedMethod) {
       Alert.alert(
         "Selection Required",
         "Please choose a payment method first.",
@@ -51,50 +54,81 @@ const Payment = () => {
       return;
     }
 
-   setLoading(true);
-  try {
-    const orderPayload = {
-      userEmail: selectedAddress?.email,
-      items: products,
-      totalAmount: amount,
-      shippingAddress: selectedAddress,
-      status: "Processing",
-      paymentMethod: selectedMethod === "card" ? "Online" : "COD",
-      paymentId: paymentId,
-      createdAt: new Date(),
-    };
+    setLoading(true);
+    try {
+      const orderPayload = {
+        userEmail: selectedAddress?.email,
+        items: products,
+        totalAmount: amount,
+        shippingAddress: selectedAddress,
+        status: selectedMethod === "card" ? "Confirmed" : "Processing",
+        paymentMethod: selectedMethod === "card" ? "Online" : "COD",
+        paymentId: paymentDetails.paymentId || "COD_OFFLINE",
+        createdAt: new Date(),
+      };
 
-      const response = await axios.post(`${API_BASE_URL}/place-order`, orderPayload);
+      const response = await axios.post(
+        `${API_BASE_URL}/place-order`,
+        orderPayload
+      );
 
       if (response.data.status) {
-      await axios.delete(`${API_BASE_URL}/clear-cart/${selectedAddress?.email}`);
+        await axios.delete(`${API_BASE_URL}/clear-cart/${selectedAddress?.email}`);
 
-      router.replace("/components/OrderSuccess"); 
-    }
+        Alert.alert(
+          "Success",
+          selectedMethod === "card"
+            ? "Payment successful! Order placed."
+            : "Order placed successfully!"
+        );
+        router.replace("/components/OrderSuccess");
+      } else {
+        Alert.alert("Error", response.data.message || "Failed to place order");
+      }
     } catch (error) {
-    Alert.alert("Error", "Order process nahi ho paya.");
-  } finally {
-    setLoading(false);
-  }
-};
+      console.error("Order Error:", error);
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to place order"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Razorpay Checkout with Grand Total
   const openRazorpay = () => {
     const options = {
-      key: "rzp_test_vv1FCZvuDRF6lQ",
-      amount: (amount * 100).toString(),
+      description: "Order Payment",
+      image: "https://your-logo-url.com/logo.png",
       currency: "INR",
-      name: "Your Store Name",
-      description: "Purchase Payment",
+      key: RAZORPAY_TEST_KEY_ID,
+      amount: Math.round(amount * 100).toString(), // Convert to paise
+      name: "AeroCart",
       prefill: {
         email: selectedAddress?.email || "",
         contact: selectedAddress?.phone || "",
+        name: selectedAddress?.fullName || "",
       },
-      theme: { color: "#0aad0a" },
+      theme: {
+        color: "#0aad0a",
+      },
     };
 
     RazorpayCheckout.open(options)
-      .then((res) => handlePlaceOrder(res.razorpay_payment_id))
-      .catch((err) => Alert.alert("Payment Failed", err.description));
+      .then((data) => {
+        // Payment successful - place order with payment ID
+        handlePlaceOrder({
+          paymentId: data.razorpay_payment_id,
+          orderSuccess: true,
+        });
+      })
+      .catch((error) => {
+        if (error.code !== 0) {
+          // User didn't dismiss modal
+          Alert.alert("Payment Failed", error.description || "Payment cancelled");
+        }
+      });
   };
 
   return (
@@ -145,6 +179,7 @@ const Payment = () => {
               selectedMethod === option.id && styles.selectedOption,
             ]}
             onPress={() => setSelectedMethod(option.id)}
+            disabled={loading}
           >
             <MaterialIcons
               name={option.icon}
@@ -172,7 +207,9 @@ const Payment = () => {
           disabled={loading || !selectedMethod}
         >
           <Text style={styles.payBtnText}>
-            {loading ? "Processing..." : `Place Order (₹${amount.toFixed(2)})`}
+            {loading
+              ? "Processing..."
+              : `${selectedMethod === "card" ? "Pay with Razorpay" : "Place Order"} (₹${amount.toFixed(2)})`}
           </Text>
         </TouchableOpacity>
       </ScrollView>

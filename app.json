@@ -20,13 +20,25 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.rishavaeron.groot",
+      "permissions": ["INTERNET"]
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/54a53098-7532-4d2f-852c-944f81d8caa1",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "plugins": [
+      "./app.plugin.js",
       "expo-router",
       [
         "expo-splash-screen",
@@ -40,11 +52,19 @@
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "apiUrl": "https://freshcart-backend-seven.vercel.app",
+      "router": {},
+      "eas": {
+        "projectId": "54a53098-7532-4d2f-852c-944f81d8caa1"
+      }
     }
   }
 }

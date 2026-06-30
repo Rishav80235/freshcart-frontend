@@ -107,7 +107,7 @@ const Checkout = () => {
       },
     });
   };
-
+  
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#2c3e50" />
