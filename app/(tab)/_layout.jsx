@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Platform } from "react-native";
+import Analytics from "../components/Analytics";
 
 
 export default function TabLayout() {
@@ -30,59 +31,61 @@ export default function TabLayout() {
   }, [pathname]);
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: "#10ac84", // Freshcart theme color
-        tabBarInactiveTintColor: "#7f8c8d",
-        tabBarStyle: {
-          paddingBottom: 5,
-          paddingTop: 5,
-          marginBottom: (Platform.OS === "android" ? insets.bottom : 0),
-          height: 60 + (Platform.OS === "android" ? insets.bottom : 0),
-          backgroundColor: "#fff",
-          display: showTabs ? "flex" : "none",
-        },
-        headerShown: false,
-      }}
-    >
-      {/* Make sure 'name' exactly matches your file names inside (tab) folder */}
-      <Tabs.Screen
-        name="Index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <Feather name="home" color={color} size={24} />
-          ),
+    <>
+      <Analytics />
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: "#10ac84", // Freshcart theme color
+          tabBarInactiveTintColor: "#7f8c8d",
+          tabBarStyle: {
+            paddingBottom: 5,
+            paddingTop: 5,
+            marginBottom: (Platform.OS === "android" ? insets.bottom : 0),
+            height: 60 + (Platform.OS === "android" ? insets.bottom : 0),
+            backgroundColor: "#fff",
+            display: showTabs ? "flex" : "none",
+          },
+          headerShown: false,
         }}
-      />
-      <Tabs.Screen
-        name="Cart"
-        options={{
-          title: "Cart",
-          tabBarIcon: ({ color }) => (
-            <Feather name="shopping-cart" color={color} size={24} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="Wishlist"
-        options={{
-          title: "Wishlist",
-          tabBarIcon: ({ color }) => (
-            <AntDesign name="heart" color={color} size={24} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="Profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color }) => (
-            <Feather name="user" color={color} size={24} />
-          ),
-        }}
-      />
-    </Tabs>
+      >
+        {/* Make sure 'name' exactly matches your file names inside (tab) folder */}
+        <Tabs.Screen
+          name="Index"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color }) => (
+              <Feather name="home" color={color} size={24} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="Cart"
+          options={{
+            title: "Cart",
+            tabBarIcon: ({ color }) => (
+              <Feather name="shopping-cart" color={color} size={24} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="Wishlist"
+          options={{
+            title: "Wishlist",
+            tabBarIcon: ({ color }) => (
+              <AntDesign name="heart" color={color} size={24} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="Profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color }) => (
+              <Feather name="user" color={color} size={24} />
+            ),
+          }}
+        />
+      </Tabs>
+    </>
   );
 }
