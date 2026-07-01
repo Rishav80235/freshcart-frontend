@@ -7,8 +7,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Platform } from "react-native";
-import Analytics from "../components/Analytics";
-
 
 export default function TabLayout() {
   const pathname = usePathname();
@@ -32,7 +30,6 @@ export default function TabLayout() {
 
   return (
     <>
-      <Analytics />
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#10ac84", // Freshcart theme color
