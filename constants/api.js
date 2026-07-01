@@ -53,9 +53,15 @@ export const API_BASE_URL = (() => {
     return String(fromEnv).replace(/\/$/, '');
   }
 
-  // LIVE API
-  return 'https://freshcart-backend-gamma.vercel.app';
+  // If running on Expo without env var, fall back to extra.apiUrl (set in app.json)
+  // or use localhost for local development.
+  const fallback = Constants.expoConfig?.extra?.apiUrl;
+  if (fallback) {
+    return String(fallback).replace(/\/$/, '');
+  }
+  return 'http://localhost:8080/';
 })();
+
 
 /**
  * API ENDPOINTS
