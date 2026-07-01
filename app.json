@@ -60,7 +60,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiUrl": "https://freshcart-backend-seven.vercel.app",
+      "apiUrl": "https://freshcart-backend-gamma.vercel.app/",
       "router": {},
       "eas": {
         "projectId": "54a53098-7532-4d2f-852c-944f81d8caa1"

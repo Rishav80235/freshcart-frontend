@@ -54,7 +54,7 @@ export const API_BASE_URL = (() => {
   }
 
   // LIVE API
-  return 'https://freshcart-backend-seven.vercel.app';
+  return 'https://freshcart-backend-gamma.vercel.app/';
 })();
 
 /**
